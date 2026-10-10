@@ -8,3 +8,19 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+rootProject.name = 'overworld_coordinates'
+
+def versions = [
+        '1.19.4',
+        '1.20.1',
+        '1.21.1',
+        '1.21.10',
+        '1.21.11',
+        '26.3',
+]
+
+versions.each { mcVersion ->
+    include(":${mcVersion}")
+    project(":${mcVersion}").projectDir = file("versions/${mcVersion}")
+}

@@ -1,0 +1,113 @@
+// Shared configuration for every per-Minecraft-version subproject.
+// Each subproject (versions/<mcVersion>) applies this script and provides its own
+// gradle.properties with the version specific values.
+
+// [FEATURE] MC_VERSION_NUM: comparable number of the targeted Minecraft version (e.g. 1.21.10 -> 12110, 26.3 -> 260300)
+final int mcVersionNum = Integer.parseInt(project.mc_version_num)
+
+// [FEATURE] UNOBFUSCATED: since 26.1 Mojang ships the game unobfuscated, which needs a different loom flavour
+final boolean unobfuscated = mcVersionNum >= 260000
+
+// [FEATURE] SOURCE_VARIANT: which version specific source set has to be compiled in addition to the shared one
+final String sourceVariant = project.source_variant
+
+// [FEATURE] MIXIN_CONFIG: the mixin config matching SOURCE_VARIANT
+final String mixinConfigFile = "overworld_coordinates.${sourceVariant}.mixins.json"
+
+apply plugin: unobfuscated ? 'net.fabricmc.fabric-loom' : 'net.fabricmc.fabric-loom-remap'
+
+group = project.maven_group
+base.archivesName = project.archives_base_name
+version = "${project.mod_version}+mc${project.minecraft_version}"
+
+repositories {
+	maven {
+		name = 'Modrinth'
+		url = 'https://api.modrinth.com/maven'
+		content { includeGroup('maven.modrinth') }
+	}
+	mavenCentral()
+}
+
+// https://github.com/FabricMC/fabric-loader/issues/783
+// fabric-loader is never inherited transitively, it is always the one declared here.
+def autoMod = { Object... notations ->
+	def configuration = configurations.getByName(unobfuscated ? 'implementation' : 'modImplementation')
+	notations.each { notation ->
+		def dependency = dependencies.create(notation)
+		if (!(dependency.group == 'net.fabricmc' && dependency.name == 'fabric-loader')) {
+			dependency.exclude group: 'net.fabricmc', module: 'fabric-loader'
+		}
+		configuration.dependencies.add(dependency)
+	}
+}
+
+dependencies {
+	// loom
+	dependencies.add('minecraft', "com.mojang:minecraft:${project.minecraft_version}")
+	if (!unobfuscated) {
+		// Mojang's official mappings are the only mapping namespace that stays stable enough
+		// to share one source set between all supported Minecraft versions.
+		dependencies.add('mappings', loom.layered {
+			officialMojangMappings()
+		})
+	}
+	autoMod "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	// BetterF3 is an optional (soft) integration - it is compiled against, but never bundled
+	autoMod "maven.modrinth:betterf3:${project.betterf3_version}"
+}
+
+sourceSets {
+	main {
+		java {
+			srcDirs = [
+					rootProject.file('src/main/java'),
+					rootProject.file("src/${sourceVariant}/java"),
+			]
+		}
+		resources {
+			srcDirs = [rootProject.file('src/main/resources')]
+		}
+	}
+}
+
+processResources {
+	def modProperties = [
+			"version"              : project.version,
+			"minecraft_dependency" : project.minecraft_dependency,
+			"java_dependency"      : project.java_dependency,
+			"loader_dependency"    : ">=${project.loader_version}",
+			"mixin_config"         : mixinConfigFile,
+			"compatibility_level"  : project.mixin_compatibility_level,
+	]
+	inputs.properties(modProperties)
+
+	filesMatching('fabric.mod.json') {
+		expand modProperties
+	}
+	// every variant specific config ends up in the jar, but only the one referenced by
+	// fabric.mod.json is ever loaded - still expand all of them to keep them valid json
+	filesMatching('*.mixins.json') {
+		expand 'compatibility_level': modProperties.compatibility_level
+	}
+}
+
+java {
+	sourceCompatibility = JavaVersion.toVersion(project.java_version)
+	targetCompatibility = JavaVersion.toVersion(project.java_version)
+
+	withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+	options.release = Integer.parseInt(project.java_version)
+}
+
+jar {
+	inputs.property 'archives_base_name', project.archives_base_name
+	from(rootProject.file('LICENSE')) {
+		rename { "${it}_${inputs.properties.archives_base_name}" }
+	}
+}

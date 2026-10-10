@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "Overworld Coordinates",
-  "description": "Shows coordinates in different dimensions in the scale of the overworld",
+  "description": "Shows coordinates in different dimensions in the scale of the overworld, plus the matching nether coordinates while standing in the overworld",
   "authors": [
     "Benonardo"
   ],
@@ -18,13 +18,13 @@
   "environment": "client",
   "entrypoints": {},
   "mixins": [
-    "overworld_coordinates.mixins.json"
+    "${mixin_config}"
   ],
 
   "depends": {
-    "fabricloader": ">=0.15.11",
-    "minecraft": ">=1.19 <=1.20.6",
-    "java": ">=17"
+    "fabricloader": "${loader_dependency}",
+    "minecraft": "${minecraft_dependency}",
+    "java": "${java_dependency}"
   },
   "recommends": {
     "betterf3": "*"

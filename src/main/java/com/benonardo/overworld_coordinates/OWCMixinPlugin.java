@@ -9,6 +9,13 @@ import java.util.List;
 import java.util.Set;
 
 public class OWCMixinPlugin implements IMixinConfigPlugin {
+
+    /**
+     * The vanilla F3 screen mixin and the BetterF3 mixin are mutually exclusive: BetterF3 replaces the
+     * vanilla debug screen entirely, so only one of them has to be applied.
+     */
+    private static final String VANILLA_F3_MIXIN_PREFIX = "com.benonardo.overworld_coordinates.mixin.Debug";
+
     @Override
     public void onLoad(String mixinPackage) {
 
@@ -21,7 +28,7 @@ public class OWCMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return !FabricLoader.getInstance().isModLoaded("betterf3") || !mixinClassName.equals("com.benonardo.overworld_coordinates.mixin.DebugHudMixin");
+        return !FabricLoader.getInstance().isModLoaded("betterf3") || !mixinClassName.startsWith(VANILLA_F3_MIXIN_PREFIX);
     }
 
     @Override

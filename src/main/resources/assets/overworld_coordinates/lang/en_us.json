@@ -1,3 +1,5 @@
-{
-  "text.betterf3.line.overworld_coords": "Overworld"
+﻿{
+  "text.betterf3.line.overworld_coords": "Overworld",
+  "text.betterf3.line.nether_coords": "Nether",
+  "owc.format.coords2d": "%s: %s  %s"
 }

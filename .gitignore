@@ -26,8 +26,13 @@ bin/
 
 # macos
 
-*.DS_Store
+.DS_Store
 
 # fabric
 
 run/
+
+# per Minecraft version subprojects
+
+versions/*/build/
+versions/*/run/
