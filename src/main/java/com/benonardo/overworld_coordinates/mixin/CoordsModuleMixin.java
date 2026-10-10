@@ -19,7 +19,6 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 @Pseudo
@@ -38,36 +37,42 @@ public abstract class CoordsModuleMixin extends BaseModule {
     @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 0, shift = At.Shift.AFTER))
     private void registerOverworldCoordinates(CallbackInfo ci) {
         this.lines.add(new DebugLine("overworld_coords", "format.betterf3.coords", true));
-        this.lines.add(new DebugLine("nether_coords", "owc.format.coords2d", true));
+        this.lines.add(new DebugLine("nether_coords", "format.betterf3.coords", true));
     }
 
     @Inject(method = "update", at = @At(value = "INVOKE", target = "Lme/cominixo/betterf3/utils/DebugLine;value(Ljava/lang/Object;)V", ordinal = 0, shift = At.Shift.AFTER))
     private void appendOverworldCoordinates(Minecraft client, CallbackInfo ci) {
+        DebugLine overworld = this.lines.get(OVERWORLD_LINE);
+        DebugLine nether = this.lines.get(NETHER_LINE);
+
         Level level = client.level;
         Entity camera = client.getCameraEntity();
         if (level == null || camera == null) {
-            this.lines.get(NETHER_LINE).active = false;
+            overworld.active = false;
+            nether.active = false;
             return;
         }
 
         double scale = level.dimensionType().coordinateScale();
         double x = camera.getX() * scale;
-        double y = camera.getY() * scale;
         double z = camera.getZ() * scale;
+        // Y is never scaled
+        double y = camera.getY();
 
-        this.lines.get(OVERWORLD_LINE).value(Arrays.asList(
-                Utils.styledText(format(x), this.colorX),
-                Utils.styledText(format(y, "%.5f"), this.colorY),
-                Utils.styledText(format(z), this.colorZ)));
-
-        DebugLine nether = this.lines.get(NETHER_LINE);
         if (level.dimension() == Level.OVERWORLD) {
-            nether.value(List.of(
+            // the overworld line would only repeat the vanilla coordinates here
+            overworld.active = false;
+            nether.value(Arrays.asList(
                     Utils.styledText(format(x * CoordinateLines.NETHER_SCALE), this.colorX),
+                    Utils.styledText(format(y, "%.5f"), this.colorY),
                     Utils.styledText(format(z * CoordinateLines.NETHER_SCALE), this.colorZ)));
             nether.active = true;
         } else {
-            // only meaningful while standing in the overworld
+            overworld.value(Arrays.asList(
+                    Utils.styledText(format(x), this.colorX),
+                    Utils.styledText(format(y, "%.5f"), this.colorY),
+                    Utils.styledText(format(z), this.colorZ)));
+            overworld.active = true;
             nether.active = false;
         }
     }

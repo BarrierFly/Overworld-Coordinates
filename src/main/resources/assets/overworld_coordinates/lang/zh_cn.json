@@ -1,5 +1,4 @@
 ﻿{
   "text.betterf3.line.overworld_coords": "主世界",
-  "text.betterf3.line.nether_coords": "下界",
-  "owc.format.coords2d": "%s: %s  %s"
+  "text.betterf3.line.nether_coords": "下界"
 }

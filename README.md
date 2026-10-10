@@ -5,9 +5,10 @@ Not anymore!
 
 ## What this mod does
 
-- Adds a new line for horizontal coordinates in the scale of the overworld.
-- While you are standing **in the overworld**, it additionally shows the matching nether coordinates, so you know where to aim your portal.
-- The overworld line is shown in every dimension. The only dimension in vanilla this affects is the nether (with a scale of 8), but it will work with any custom dimension utilising coordinate scales!
+- Adds a single extra line with the current position converted into the scale of the overworld.
+- While you are standing **in the overworld** it instead shows the matching nether coordinates, so you know where to aim your portal. The overworld line would only repeat the vanilla coordinates there, so it is hidden.
+- Everywhere else the overworld line is shown. The only dimension in vanilla this affects is the nether (with a scale of 8), but it will work with any custom dimension utilising coordinate scales!
+- Only the horizontal axes are converted, the Y axis always maps 1:1 and is printed unchanged.
 
 ![demonstration](https://github.com/Benonardo/Overworld-Coordinates/raw/main/demonstration.png)
 
