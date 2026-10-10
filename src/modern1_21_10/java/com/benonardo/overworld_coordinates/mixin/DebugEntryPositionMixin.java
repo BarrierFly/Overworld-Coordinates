@@ -1,12 +1,13 @@
 package com.benonardo.overworld_coordinates.mixin;
 
 import com.benonardo.overworld_coordinates.CoordinateLines;
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.client.gui.components.debug.DebugEntryPosition;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -22,8 +23,14 @@ import java.util.List;
 @Mixin(DebugEntryPosition.class)
 public class DebugEntryPositionMixin {
 
-    @ModifyExpressionValue(method = "display", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/debug/DebugScreenDisplayer;addToGroup(Lnet/minecraft/resources/ResourceLocation;Ljava/util/Collection;)V", ordinal = 0))
-    private List<String> appendOverworldCoordinates(List<String> original) {
+    /**
+     * Replaces the lines the entry publishes with the same lines plus ours.
+     * <p>
+     * {@code addToGroup} returns void, so the line list has to be swapped out as an argument
+     * rather than by modifying the result of the call.
+     */
+    @ModifyArg(method = "display", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/debug/DebugScreenDisplayer;addToGroup(Lnet/minecraft/resources/ResourceLocation;Ljava/util/Collection;)V", ordinal = 0), index = 1)
+    private Collection<String> appendOverworldCoordinates(Collection<String> original) {
         List<String> lines = new ArrayList<>(original);
         lines.addAll(CoordinateLines.build());
         return lines;
