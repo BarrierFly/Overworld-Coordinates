@@ -31,6 +31,10 @@ None! It works out of the box.
 installed the extra lines are rendered as part of BetterF3's coordinates module instead of the
 vanilla F3 screen.
 
+Fabric loader **0.15.11 or newer** is required, except for 26.3 which needs **0.16.5**. The mod
+relies on MixinExtras (which loader embeds) and on the mixin compatibility level declared in the
+mod's mixin config - `JAVA_25` is only known to the Mixin shipped with loader 0.16.5 and newer.
+
 ## Building
 
 The repository is a multi-project Gradle build. Every Minecraft version lives in its own

@@ -14,6 +14,15 @@ final String sourceVariant = project.source_variant
 // [FEATURE] MIXIN_CONFIG: the mixin config matching SOURCE_VARIANT
 final String mixinConfigFile = "overworld_coordinates.${sourceVariant}.mixins.json"
 
+// [FEATURE] LOADER_DEPENDENCY: the oldest fabric loader a player may run this jar with.
+// This is not the version we compile against - it is dictated by the two things we rely on
+// from the loader at runtime:
+//   - MixinExtras (@Local, @ModifyExpressionValue), which loader embeds
+//   - a Mixin that knows our mixin config's compatibilityLevel, since an unknown level is a
+//     hard error. Loader 0.16.5 is the first one whose Mixin knows JAVA_25, which is what the
+//     26.3 build needs; everything older only ever needs JAVA_21 or lower.
+final String loaderDependency = project.fabricloader_dependency
+
 apply plugin: unobfuscated ? 'net.fabricmc.fabric-loom' : 'net.fabricmc.fabric-loom-remap'
 
 group = project.maven_group
@@ -77,7 +86,7 @@ processResources {
 			"version"              : project.version,
 			"minecraft_dependency" : project.minecraft_dependency,
 			"java_dependency"      : project.java_dependency,
-			"loader_dependency"    : ">=${project.loader_version}",
+			"loader_dependency"    : loaderDependency,
 			"mixin_config"         : mixinConfigFile,
 			"compatibility_level"  : project.mixin_compatibility_level,
 	]
